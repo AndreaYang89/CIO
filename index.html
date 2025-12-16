@@ -4,67 +4,398 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CIO TERMINAL // V2026</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'bg-dark': '#050505',
-                        'primary-neon': '#00f2ff',
-                        'secondary-neon': '#7000ff',
-                        'success': '#00ff9d',
-                        'danger': '#ff0055',
-                        'text-muted': '#8b9bb4',
-                        'card-glass': 'rgba(20, 20, 25, 0.6)',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
     <style>
+        :root {
+            --bg-dark: #050505;
+            --card-glass: rgba(20, 20, 25, 0.6);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --primary-neon: #00f2ff; /* 青色霓虹 */
+            --secondary-neon: #7000ff; /* 紫色霓虹 */
+            --success: #00ff9d;
+            --danger: #ff0055;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --font-ui: 'Inter', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+
         body {
-            background-color: #050505;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
             background-image: 
                 radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.15) 0%, transparent 40%),
                 radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 40%),
                 linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px; /* 网格背景 */
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
         }
-        /* Custom Scrollbar for Terminal Feel */
-        ::-webkit-scrollbar {
-            width: 8px;
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+            z-index: 1;
         }
-        ::-webkit-scrollbar-track {
-            background: #0a0a0a; 
+
+        /* 顶部 Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 20px;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #333; 
+
+        .brand h1 {
+            font-family: var(--font-code);
+            font-size: 2.5rem;
+            margin: 0;
+            letter-spacing: -2px;
+            background: linear-gradient(90deg, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .brand span {
+            font-size: 0.8rem;
+            color: var(--primary-neon);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .system-status {
+            font-family: var(--font-code);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        .system-status span { color: var(--success); }
+
+        /* 卡片网格布局 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        /* 玻璃拟态卡片 */
+        .card {
+            background: var(--card-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 卡片顶部的发光条 */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--secondary-neon), var(--primary-neon));
+            opacity: 0.5;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 i { color: var(--primary-neon); }
+
+        /* 表单元素 */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-family: var(--font-code);
+            letter-spacing: 0.5px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-glass);
+            color: #fff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-family: var(--font-code);
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-neon);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        }
+
+        /* 按钮样式 */
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            font-family: var(--font-code);
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-neon), #4a00e0);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(112, 0, 255, 0.4);
+            filter: brightness(1.2);
+        }
+
+        .btn-success {
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .btn-success:hover {
+            background: var(--success);
+            color: black;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
+        }
+
+        /* 结果输出区 */
+        .result-box {
+            background: rgba(0, 0, 0, 0.6);
+            border-left: 3px solid var(--text-muted);
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 8px 8px 0;
+            font-family: var(--font-code);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
             border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-right: 5px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555; 
+        .tag-green { background: rgba(0, 255, 157, 0.2); color: var(--success); }
+        .tag-red { background: rgba(255, 0, 85, 0.2); color: var(--danger); }
+
+        /* 特殊布局 - 全宽 Prompt */
+        .card-full {
+            grid-column: 1 / -1;
         }
+
+        .row { display: flex; gap: 15px; }
+        .col { flex: 1; }
+
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
-    "@google/genai": "https://esm.sh/@google/genai@^1.33.0"
-  }
-}
-</script>
 </head>
-<body class="min-h-screen text-white font-sans antialiased selection:bg-primary-neon selection:text-black">
-    <div id="root"></div>
+<body>
+
+<div class="container">
+    <header>
+        <div class="brand">
+            <span>Portfolio Management System</span>
+            <h1>CIO Terminal</h1>
+        </div>
+        <div class="system-status">
+            SYSTEM: <span>ONLINE</span><br>
+            LOC: <span>SINGAPORE</span><br>
+            USER: <span>ADMIN</span>
+        </div>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <h2><i>📊</i> Arbitrage Monitor // 套利雷达</h2>
+            <div class="row">
+                <div class="col input-group">
+                    <label>USD YIELD (理财 %)</label>
+                    <input type="number" id="usdRate" value="3.19" step="0.01">
+                </div>
+                <div class="col input-group">
+                    <label>CNY COST (贷率 %)</label>
+                    <input type="number" id="cnyLoanRate" value="3.05" step="0.01">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="checkArbitrage()">RUN DIAGNOSTIC</button>
+            <div id="arbitrageResult" class="result-box"></div>
+        </div>
+
+        <div class="card">
+            <h2><i>🔄</i> Rebalance Calc // 高低切换</h2>
+            <div class="row">
+                <div class="col input-group">
+                    <label>HOLDING VALUE (持仓市值)</label>
+                    <input type="number" id="currentValue" placeholder="50000">
+                </div>
+                <div class="col input-group">
+                    <label>PROFIT (浮盈 %)</label>
+                    <input type="number" id="profitPct" value="15">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>SELL TARGET (止盈比例 %)</label>
+                <input type="range" id="sellPctSlider" min="0" max="100" value="50" oninput="document.getElementById('sellPctDisplay').innerText = this.value + '%'">
+                <div style="text-align: right; color: var(--primary-neon); font-family: var(--font-code);" id="sellPctDisplay">50%</div>
+            </div>
+            <button class="btn-success" onclick="calcSwitch()">CALCULATE EXECUTION</button>
+            <div id="switchResult" class="result-box"></div>
+        </div>
+
+        <div class="card card-full">
+            <h2><i>🧠</i> AI Review Protocol // 复盘指令生成</h2>
+            <div class="row">
+                <div class="col input-group">
+                    <label>ASSET (标的)</label>
+                    <input type="text" id="ticker" placeholder="e.g. 机器人ETF (159530)">
+                </div>
+                <div class="col input-group">
+                    <label>ACTION (操作)</label>
+                    <select id="action">
+                        <option value="买入">BUY (开仓/加仓)</option>
+                        <option value="卖出">SELL (止盈/止损)</option>
+                        <option value="持有">HOLD (观望)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>LOGIC (逻辑面)</label>
+                <textarea id="reason" rows="2" placeholder="Input strategic reasoning..."></textarea>
+            </div>
+            <div class="row">
+                <div class="col input-group">
+                    <label>EMOTION (心理面)</label>
+                    <input type="text" id="emotion" placeholder="Input emotional state...">
+                </div>
+                <div class="col input-group">
+                    <label>RESULT (结果)</label>
+                    <input type="text" id="result" placeholder="P&L Status...">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="generatePrompt()">GENERATE PROMPT</button>
+            
+            <div id="promptOutput" class="result-box" style="border-left-color: var(--primary-neon); color: #fff;"></div>
+            <button id="copyBtn" class="btn-success" onclick="copyToClipboard()" style="display:none; margin-top:15px;">COPY TO CLIPBOARD</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. 套利逻辑
+    function checkArbitrage() {
+        const usd = parseFloat(document.getElementById('usdRate').value);
+        const loan = parseFloat(document.getElementById('cnyLoanRate').value);
+        const diff = (usd - loan).toFixed(2);
+        
+        const box = document.getElementById('arbitrageResult');
+        box.style.display = 'block';
+        
+        if (usd > loan) {
+            box.innerHTML = `<span class="tag tag-green">STRATEGY ACTIVE</span>\nSPREAD: <strong>+${diff}%</strong>\n\n>> 建议执行: 保留美元资产，全额使用人民币贷款。\n>> 状态: <span style="color:var(--success)">POSITIVE CARRY</span>`;
+            box.style.borderLeftColor = 'var(--success)';
+        } else {
+            box.innerHTML = `<span class="tag tag-red">WARNING</span>\nSPREAD: <strong>${diff}%</strong>\n\n>> 建议: 若长期倒挂 >0.5%，考虑结汇。\n>> 状态: NEGATIVE CARRY`;
+            box.style.borderLeftColor = 'var(--danger)';
+        }
+    }
+
+    // 2. 调仓逻辑
+    function calcSwitch() {
+        const value = parseFloat(document.getElementById('currentValue').value);
+        const sellPct = parseFloat(document.getElementById('sellPctSlider').value) / 100;
+        
+        if (!value) return;
+
+        const cashBack = (value * sellPct).toFixed(0);
+        const keepValue = (value * (1 - sellPct)).toFixed(0);
+        
+        const box = document.getElementById('switchResult');
+        box.style.display = 'block';
+        box.innerHTML = `> CASH IN: <span style="color:#fff; font-weight:bold">${cashBack} CNY</span>\n> HOLDING: ${keepValue} CNY\n\n------------------------\n[NEXT STEP]\n等待目标标的（机器人ETF）企稳，分批买入释放的资金。`;
+    }
+
+    // 3. Prompt 生成逻辑
+    function generatePrompt() {
+        const ticker = document.getElementById('ticker').value;
+        const action = document.getElementById('action').value;
+        const reason = document.getElementById('reason').value;
+        const emotion = document.getElementById('emotion').value;
+        const result = document.getElementById('result').value;
+
+        const promptText = `**Role: 资深首席交易官 (CIO)**\n请帮我复盘以下交易：\n\n- **标的**: ${ticker}\n- **操作**: ${action}\n- **逻辑**: ${reason}\n- **心理**: ${emotion}\n- **现状**: ${result}\n\n请从逻辑闭环、执行纪律、风控合规、心理建设四个维度进行无情剖析，并给出下一步行动建议。`;
+
+        const box = document.getElementById('promptOutput');
+        box.style.display = 'block';
+        box.innerText = promptText;
+        document.getElementById('copyBtn').style.display = 'block';
+    }
+
+    function copyToClipboard() {
+        const text = document.getElementById('promptOutput').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('指令已复制！系统准备就绪。');
+        });
+    }
+</script>
+
 </body>
 </html>
