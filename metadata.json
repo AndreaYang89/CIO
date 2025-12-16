@@ -1,0 +1,5 @@
+{
+  "name": "CIO Terminal",
+  "description": "A cyberpunk-styled personal asset management dashboard featuring arbitrage monitoring, portfolio rebalancing calculations, and AI-powered trading review generation.",
+  "requestFramePermissions": []
+}
