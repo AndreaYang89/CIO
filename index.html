@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CIO TERMINAL // V2026</title>
+    <title>CIO TERMINAL // ULTIMATE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #050505;
-            --card-glass: rgba(20, 20, 25, 0.6);
-            --border-glass: rgba(255, 255, 255, 0.1);
-            --primary-neon: #00f2ff; /* 青色霓虹 */
-            --secondary-neon: #7000ff; /* 紫色霓虹 */
+            --bg-dark: #030305;
+            --card-bg: rgba(20, 20, 30, 0.6);
+            --primary: #00f2ff;
+            --primary-dim: rgba(0, 242, 255, 0.1);
+            --secondary: #bd00ff;
             --success: #00ff9d;
             --danger: #ff0055;
             --text-main: #ffffff;
-            --text-muted: #8b9bb4;
+            --text-muted: #94a3b8;
             --font-ui: 'Inter', sans-serif;
             --font-code: 'JetBrains Mono', monospace;
         }
@@ -24,356 +24,486 @@
 
         body {
             margin: 0;
-            padding: 0;
+            padding: 40px 20px;
             background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 40%),
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px; /* 网格背景 */
             color: var(--text-main);
             font-family: var(--font-ui);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        /* 动态背景网格 */
+        .bg-grid {
+            position: fixed;
+            top: 0; left: 0; width: 200vw; height: 200vh;
+            background-image: 
+                linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: gridMove 20s linear infinite;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
+        }
+
+        /* CRT 扫描线遮罩 */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0.6;
         }
 
         .container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
             position: relative;
             z-index: 1;
+            animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        /* 顶部 Header */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header 区域 */
         header {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-bottom: 40px;
-            border-bottom: 1px solid var(--border-glass);
+            margin-bottom: 50px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             padding-bottom: 20px;
+            position: relative;
         }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; left: 0; width: 0%; height: 1px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            animation: loadLine 1.5s ease-out forwards 0.5s;
+        }
+
+        @keyframes loadLine { to { width: 100%; } }
 
         .brand h1 {
             font-family: var(--font-code);
             font-size: 2.5rem;
             margin: 0;
-            letter-spacing: -2px;
             background: linear-gradient(90deg, #fff, var(--text-muted));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-transform: uppercase;
+            letter-spacing: -2px;
+            position: relative;
         }
-
+        
         .brand span {
             font-size: 0.8rem;
-            color: var(--primary-neon);
-            letter-spacing: 2px;
+            color: var(--primary);
+            letter-spacing: 4px;
             text-transform: uppercase;
-            font-weight: 600;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px var(--primary);
         }
 
-        .system-status {
+        .status-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            margin-right: 5px;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(0, 255, 157, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
+        }
+
+        .system-info {
             font-family: var(--font-code);
             font-size: 0.75rem;
             color: var(--text-muted);
             text-align: right;
+            line-height: 1.6;
         }
 
-        .system-status span { color: var(--success); }
-
-        /* 卡片网格布局 */
+        /* 布局与卡片 */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 30px;
         }
 
-        /* 玻璃拟态卡片 */
         .card {
-            background: var(--card-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
             padding: 30px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
+        /* 卡片悬停光效 */
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(0, 242, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(0, 242, 255, 0.1);
         }
 
-        /* 卡片顶部的发光条 */
-        .card::before {
+        .card::before { /* 顶部流光 */
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--secondary-neon), var(--primary-neon));
-            opacity: 0.5;
+            top: 0; left: -100%; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            transition: 0.5s;
+        }
+        .card:hover::before { left: 100%; transition: 0.5s; }
+
+        /* 卡片角落装饰 */
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 20px; height: 20px;
+            border-bottom: 2px solid var(--text-muted);
+            border-right: 2px solid var(--text-muted);
+            opacity: 0.3;
+            transition: 0.3s;
+        }
+        .card:hover::after {
+            border-color: var(--primary);
+            opacity: 1;
+            width: 30px; height: 30px;
         }
 
         h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-top: 0;
-            margin-bottom: 25px;
-            color: var(--text-main);
+            font-family: var(--font-code);
+            font-size: 1rem;
+            color: #fff;
+            margin: 0 0 25px 0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            letter-spacing: 1px;
         }
+        h2 i { color: var(--primary); font-style: normal; font-size: 1.2rem; }
 
-        h2 i { color: var(--primary-neon); }
-
-        /* 表单元素 */
-        .input-group {
-            margin-bottom: 20px;
-        }
-
+        /* 表单控件 */
+        .row { display: flex; gap: 20px; margin-bottom: 20px; }
+        .col { flex: 1; }
+        
         label {
             display: block;
-            font-size: 0.75rem;
+            font-family: var(--font-code);
+            font-size: 0.7rem;
             color: var(--text-muted);
             margin-bottom: 8px;
-            font-family: var(--font-code);
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
         input, select, textarea {
             width: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border-glass);
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
             color: #fff;
-            padding: 12px 15px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 6px;
             font-family: var(--font-code);
             font-size: 0.9rem;
-            transition: all 0.3s;
+            transition: 0.3s;
         }
 
         input:focus, select:focus, textarea:focus {
-            border-color: var(--primary-neon);
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.05);
+            box-shadow: 0 0 15px var(--primary-dim);
         }
 
-        /* 按钮样式 */
+        /* 自定义 Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            padding: 0;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px; height: 16px;
+            background: var(--success);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--success);
+            margin-top: -6px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* 按钮特效 */
         button {
             width: 100%;
-            padding: 14px;
-            border-radius: 8px;
+            padding: 16px;
             border: none;
+            border-radius: 6px;
             font-family: var(--font-code);
             font-weight: bold;
             font-size: 0.9rem;
-            cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s;
+            letter-spacing: 2px;
+            cursor: pointer;
             position: relative;
             overflow: hidden;
+            transition: 0.3s;
+            margin-top: 10px;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--secondary-neon), #4a00e0);
-            color: white;
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 5px var(--primary-dim);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.2;
+            transition: 0.5s;
         }
 
         .btn-primary:hover {
-            box-shadow: 0 0 20px rgba(112, 0, 255, 0.4);
-            filter: brightness(1.2);
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 20px var(--primary);
         }
+        .btn-primary:hover::before { left: 100%; }
 
         .btn-success {
-            background: rgba(0, 255, 157, 0.1);
-            color: var(--success);
+            background: transparent;
             border: 1px solid var(--success);
+            color: var(--success);
         }
-        
         .btn-success:hover {
             background: var(--success);
-            color: black;
-            box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
+            color: #000;
+            box-shadow: 0 0 20px var(--success);
         }
 
-        /* 结果输出区 */
+        /* 结果显示区（打字机风格） */
         .result-box {
-            background: rgba(0, 0, 0, 0.6);
-            border-left: 3px solid var(--text-muted);
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 0 8px 8px 0;
+            background: rgba(0,0,0,0.8);
+            border-top: 2px solid var(--text-muted);
+            padding: 20px;
+            margin-top: 25px;
             font-family: var(--font-code);
             font-size: 0.85rem;
-            line-height: 1.6;
-            color: var(--text-muted);
+            line-height: 1.8;
+            color: #fff;
             display: none;
-            animation: fadeIn 0.5s ease;
+            position: relative;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        /* 结果框发光扫描线 */
+        .result-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: scanDown 1s ease-out;
         }
+        @keyframes scanDown { from { top: 0; opacity: 1; } to { top: 100%; opacity: 0; } }
 
         .tag {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 2px;
             font-weight: bold;
+            font-size: 0.7rem;
             margin-right: 5px;
         }
-        .tag-green { background: rgba(0, 255, 157, 0.2); color: var(--success); }
-        .tag-red { background: rgba(255, 0, 85, 0.2); color: var(--danger); }
+        .tag-green { background: rgba(0, 255, 157, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .tag-red { background: rgba(255, 0, 85, 0.2); color: var(--danger); border: 1px solid var(--danger); }
 
-        /* 特殊布局 - 全宽 Prompt */
-        .card-full {
-            grid-column: 1 / -1;
+        .card-full { grid-column: 1 / -1; }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            .row { flex-direction: column; gap: 10px; }
         }
-
-        .row { display: flex; gap: 15px; }
-        .col { flex: 1; }
-
     </style>
 </head>
 <body>
 
+<div class="bg-grid"></div>
+<div class="scanlines"></div>
+
 <div class="container">
     <header>
         <div class="brand">
-            <span>Portfolio Management System</span>
-            <h1>CIO Terminal</h1>
+            <span>CIO TERMINAL // V2026</span>
+            <h1>资产作战控制台</h1>
         </div>
-        <div class="system-status">
-            SYSTEM: <span>ONLINE</span><br>
-            LOC: <span>SINGAPORE</span><br>
-            USER: <span>ADMIN</span>
+        <div class="system-info">
+            <div style="margin-bottom:5px"><span class="status-dot"></span> SYSTEM ONLINE</div>
+            <div>LOC: SINGAPORE</div>
+            <div style="color:var(--primary)">SECURE CONNECTION</div>
         </div>
     </header>
 
     <div class="grid">
         <div class="card">
-            <h2><i>📊</i> Arbitrage Monitor // 套利雷达</h2>
+            <h2><i>⦿</i> ARBITRAGE RADAR // 债务套利</h2>
             <div class="row">
-                <div class="col input-group">
-                    <label>USD YIELD (理财 %)</label>
+                <div class="col">
+                    <label>USD YIELD (美元理财 %)</label>
                     <input type="number" id="usdRate" value="3.19" step="0.01">
                 </div>
-                <div class="col input-group">
-                    <label>CNY COST (贷率 %)</label>
+                <div class="col">
+                    <label>LOAN COST (贷款利率 %)</label>
                     <input type="number" id="cnyLoanRate" value="3.05" step="0.01">
                 </div>
             </div>
-            <button class="btn-primary" onclick="checkArbitrage()">RUN DIAGNOSTIC</button>
+            <button class="btn-primary" onclick="checkArbitrage()">INITIATE DIAGNOSTIC / 诊断</button>
             <div id="arbitrageResult" class="result-box"></div>
         </div>
 
         <div class="card">
-            <h2><i>🔄</i> Rebalance Calc // 高低切换</h2>
+            <h2><i>⟳</i> REBALANCE CALC // 仓位切换</h2>
             <div class="row">
-                <div class="col input-group">
+                <div class="col">
                     <label>HOLDING VALUE (持仓市值)</label>
                     <input type="number" id="currentValue" placeholder="50000">
                 </div>
-                <div class="col input-group">
-                    <label>PROFIT (浮盈 %)</label>
+                <div class="col">
+                    <label>PROFIT (当前浮盈 %)</label>
                     <input type="number" id="profitPct" value="15">
                 </div>
             </div>
-            <div class="input-group">
-                <label>SELL TARGET (止盈比例 %)</label>
+            <div style="margin-bottom:20px">
+                <label style="display:flex; justify-content:space-between;">
+                    SELL TARGET (止盈比例)
+                    <span id="sellPctDisplay" style="color:var(--success); font-weight:bold">50%</span>
+                </label>
                 <input type="range" id="sellPctSlider" min="0" max="100" value="50" oninput="document.getElementById('sellPctDisplay').innerText = this.value + '%'">
-                <div style="text-align: right; color: var(--primary-neon); font-family: var(--font-code);" id="sellPctDisplay">50%</div>
             </div>
-            <button class="btn-success" onclick="calcSwitch()">CALCULATE EXECUTION</button>
+            <button class="btn-success" onclick="calcSwitch()">CALCULATE EXECUTION / 计算</button>
             <div id="switchResult" class="result-box"></div>
         </div>
 
         <div class="card card-full">
-            <h2><i>🧠</i> AI Review Protocol // 复盘指令生成</h2>
+            <h2><i>◈</i> AI PROTOCOL // 复盘指令生成</h2>
             <div class="row">
-                <div class="col input-group">
-                    <label>ASSET (标的)</label>
-                    <input type="text" id="ticker" placeholder="e.g. 机器人ETF (159530)">
+                <div class="col">
+                    <label>ASSET (交易标的)</label>
+                    <input type="text" id="ticker" placeholder="如: 机器人ETF (159530)">
                 </div>
-                <div class="col input-group">
-                    <label>ACTION (操作)</label>
+                <div class="col">
+                    <label>ACTION (操作方向)</label>
                     <select id="action">
                         <option value="买入">BUY (开仓/加仓)</option>
                         <option value="卖出">SELL (止盈/止损)</option>
-                        <option value="持有">HOLD (观望)</option>
+                        <option value="持有">HOLD (观望/躺平)</option>
                     </select>
                 </div>
             </div>
-            <div class="input-group">
-                <label>LOGIC (逻辑面)</label>
-                <textarea id="reason" rows="2" placeholder="Input strategic reasoning..."></textarea>
+            <div style="margin-bottom:15px">
+                <label>LOGIC (逻辑理由)</label>
+                <textarea id="reason" rows="2" placeholder="请输入核心交易逻辑..."></textarea>
             </div>
             <div class="row">
-                <div class="col input-group">
-                    <label>EMOTION (心理面)</label>
-                    <input type="text" id="emotion" placeholder="Input emotional state...">
+                <div class="col">
+                    <label>EMOTION (心理状态)</label>
+                    <input type="text" id="emotion" placeholder="如: 恐慌, 贪婪...">
                 </div>
-                <div class="col input-group">
-                    <label>RESULT (结果)</label>
-                    <input type="text" id="result" placeholder="P&L Status...">
+                <div class="col">
+                    <label>RESULT (当前结果)</label>
+                    <input type="text" id="result" placeholder="盈亏状态...">
                 </div>
             </div>
-            <button class="btn-primary" onclick="generatePrompt()">GENERATE PROMPT</button>
-            
-            <div id="promptOutput" class="result-box" style="border-left-color: var(--primary-neon); color: #fff;"></div>
-            <button id="copyBtn" class="btn-success" onclick="copyToClipboard()" style="display:none; margin-top:15px;">COPY TO CLIPBOARD</button>
+            <button class="btn-primary" onclick="generatePrompt()">GENERATE PROMPT / 生成指令</button>
+            <div id="promptOutput" class="result-box" style="border-top-color: var(--primary);"></div>
+            <button id="copyBtn" class="btn-success" onclick="copyToClipboard()" style="display:none; margin-top:15px;">COPY TO CLIPBOARD / 复制</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 1. 套利逻辑
+    // 打字机效果函数
+    function typeWriter(element, text, speed = 10) {
+        element.innerHTML = '';
+        element.style.display = 'block';
+        let i = 0;
+        function type() {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(type, speed);
+            }
+        }
+        type();
+    }
+
     function checkArbitrage() {
         const usd = parseFloat(document.getElementById('usdRate').value);
         const loan = parseFloat(document.getElementById('cnyLoanRate').value);
         const diff = (usd - loan).toFixed(2);
-        
         const box = document.getElementById('arbitrageResult');
-        box.style.display = 'block';
         
+        let html = '';
         if (usd > loan) {
-            box.innerHTML = `<span class="tag tag-green">STRATEGY ACTIVE</span>\nSPREAD: <strong>+${diff}%</strong>\n\n>> 建议执行: 保留美元资产，全额使用人民币贷款。\n>> 状态: <span style="color:var(--success)">POSITIVE CARRY</span>`;
-            box.style.borderLeftColor = 'var(--success)';
+            box.style.borderTopColor = 'var(--success)';
+            html = `<span class="tag tag-green">ACTIVE</span> SPREAD 利差: <strong>+${diff}%</strong>\n\n>> 决策建议: \n   坚决保留美元资产，全额使用人民币贷款。\n   [状态: POSITIVE CARRY 正收益]`;
         } else {
-            box.innerHTML = `<span class="tag tag-red">WARNING</span>\nSPREAD: <strong>${diff}%</strong>\n\n>> 建议: 若长期倒挂 >0.5%，考虑结汇。\n>> 状态: NEGATIVE CARRY`;
-            box.style.borderLeftColor = 'var(--danger)';
+            box.style.borderTopColor = 'var(--danger)';
+            html = `<span class="tag tag-red">WARNING</span> SPREAD 利差: <strong>${diff}%</strong>\n\n>> 决策建议: \n   若长期倒挂 > 0.5%，请考虑结汇还贷。\n   [状态: NEGATIVE CARRY 负收益]`;
         }
+        // 使用简单的显示而不是逐字打字，因为HTML标签会被打断
+        box.style.display = 'block';
+        box.innerHTML = html;
+        // 添加闪烁动画
+        box.animate([{opacity:0}, {opacity:1}], {duration: 300});
     }
 
-    // 2. 调仓逻辑
     function calcSwitch() {
         const value = parseFloat(document.getElementById('currentValue').value);
         const sellPct = parseFloat(document.getElementById('sellPctSlider').value) / 100;
-        
         if (!value) return;
 
         const cashBack = (value * sellPct).toFixed(0);
         const keepValue = (value * (1 - sellPct)).toFixed(0);
-        
         const box = document.getElementById('switchResult');
+        
+        box.style.borderTopColor = 'var(--success)';
         box.style.display = 'block';
-        box.innerHTML = `> CASH IN: <span style="color:#fff; font-weight:bold">${cashBack} CNY</span>\n> HOLDING: ${keepValue} CNY\n\n------------------------\n[NEXT STEP]\n等待目标标的（机器人ETF）企稳，分批买入释放的资金。`;
+        box.innerHTML = `> CASH IN (回笼资金): <span style="color:var(--success); font-weight:bold">${cashBack} CNY</span>\n> HOLDING (剩余持仓): ${keepValue} CNY\n\n------------------------\n[NEXT STEP 下一步行动]\n等待目标标的（如机器人ETF）企稳，分批买入释放的资金。`;
+        box.animate([{transform: 'translateY(10px)', opacity:0}, {transform: 'translateY(0)', opacity:1}], {duration: 400});
     }
 
-    // 3. Prompt 生成逻辑
     function generatePrompt() {
         const ticker = document.getElementById('ticker').value;
         const action = document.getElementById('action').value;
@@ -384,15 +514,29 @@
         const promptText = `**Role: 资深首席交易官 (CIO)**\n请帮我复盘以下交易：\n\n- **标的**: ${ticker}\n- **操作**: ${action}\n- **逻辑**: ${reason}\n- **心理**: ${emotion}\n- **现状**: ${result}\n\n请从逻辑闭环、执行纪律、风控合规、心理建设四个维度进行无情剖析，并给出下一步行动建议。`;
 
         const box = document.getElementById('promptOutput');
+        // 模拟数据传输延迟
         box.style.display = 'block';
-        box.innerText = promptText;
-        document.getElementById('copyBtn').style.display = 'block';
+        box.innerText = "analyzing input stream...";
+        
+        setTimeout(() => {
+            typeWriter(box, promptText, 5); // 启用打字机效果
+            document.getElementById('copyBtn').style.display = 'block';
+        }, 300);
     }
 
     function copyToClipboard() {
         const text = document.getElementById('promptOutput').innerText;
         navigator.clipboard.writeText(text).then(() => {
-            alert('指令已复制！系统准备就绪。');
+            const btn = document.getElementById('copyBtn');
+            const originalText = btn.innerText;
+            btn.innerText = "COPIED // 已复制";
+            btn.style.backgroundColor = "var(--success)";
+            btn.style.color = "#000";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.backgroundColor = "";
+                btn.style.color = "var(--success)";
+            }, 2000);
         });
     }
 </script>
